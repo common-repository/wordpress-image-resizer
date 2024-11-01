@@ -1,0 +1,71 @@
+Plugin Name: WordPress Image Resizer
+Plugin URI: http://www.vestaldesign.com/blog/2007/10/wordpress-image-resizer-plugin.html
+Description: Finds <img src="" /> in the post content, parses them out, and aggregates web-sized versions of the images in a <div class="images"></div> which is outputted *before* the post content.  It also generates a <div class="presskit"></div> *after* the post content which has links to full-quality versions, under a forced-download.  Thanks to phpThumb() by James Heinrich <info@silisoftware.com> available at http://phpthumb.sourceforge.net
+Author: Jeffrey Warren, NYU
+Version: 0.6
+Author URI: http://www.vestaldesign.com
+
+Copyright (C) 2007 Jeffrey Warren
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+/////////////////////
+INSTALLATION       //
+/////////////////////
+
+	REQUIRES: PHP
+	OPTIONAL BUT HIGHLY RECOMMENDED: ImageMagick
+
+	TO INSTALL: drop the wp-image-resizer folder into wp-plugins.  Then:
+	
+	1) If you want to use ImageMagick (HIGHLY recommended, it won't resize images over 800k or so otherwise) open /thumb/phpThumb.config.php and on line 132:
+	
+	$PHPTHUMB_CONFIG['imagemagick_path'] = '/your/imagemagick/directory/ImageMagick-6.3.6/bin/convert';
+	
+	2) change the first line of embed_image_tag() in this file to your desired width:
+	
+	$imgSize = 400; # desired width
+	
+	3) read /thumb/docs/phpthumb.readme.txt for other manipulation options.  This currently does an "unsharp mask" (fltr=usm) to make the smaller versions nice and sharp.
+	
+	4) Go to /wp-admin/plugins.php and enable "WordPress Image Resizer"
+
+/////////////////////
+USAGE INSTRUCTIONS //
+/////////////////////
+
+	1) Just upload your original, huge, gonzo-gigantic images normally in the WordPress Upload form when writing a post or page.  This script will find 'em and do its stuff.
+	
+	2) To "exempt" images from this script, write 'class="custom"' EXACTLY LIKE THIS:
+	
+	<img class="custom" ...
+	
+	It looks for the string '<img class="custom"' and skips those.  I would have made it smarter (regex) but might as well save on horsepower by not using regex.
+	
+	3) Write to us at webdesign@vestaldesign.com with suggestions and improvements!
+
+/////////////////////
+TROUBLESHOOTING    //
+/////////////////////
+
+	For more efficient loading we use relative paths to access the image.  If you have the images stored somewhere crazy, or if you do hard .htaccess redirects, you may want to comment out the following lines in embed_image_tag() :
+	
+	////// RELATIVE IMAGE PATHS ////////
+		$exploded = explode("/",$home);
+		$base_url = $exploded[0]."//".$exploded[2]; # cut off anything up to ".com" or ".net" etc... so if your blog is at http://poop.com/blog/, $base_url will yield only "http://poop.com"
+		$link = str_replace($base_url, "/", $link);
+		$link = str_replace("//", "/", $link); # Sometimes get_bloginfo('home') has a trailing slash (this may be unnecessary)
+	////////////////////////////////////
+	
